@@ -1,4 +1,4 @@
-# Rundeck SlackAttachment Plugin
+# Rundeck SlackNotification Plugin
 
 Use this [notification plugin][1] to post messages to Slack via
 [incoming webhook][2] using the Slack attachments format.
