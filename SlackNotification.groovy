@@ -6,7 +6,7 @@ import groovy.json.JsonOutput
 /**
  * define the default title
  */
-def defaultTitle = '$Status [$project] $job_full run by $user (#$id)'
+def defaultTitle = '${job.Status} [${job.project}] ${job.fullName} run by ${job.username} (#${job.execid})'
 
 /**
  * Expands the title string using a predefined set of tokens
@@ -19,23 +19,14 @@ def expandString(text, binding) {
     } else if (binding.execution.abortedby) {
         status = 'killed'
     }
-    // defines the tokens usable in the title configuration property
+    // custom tokens available for matching
     def tokens = [
-        '$STATUS': status.toUpperCase(),
-        '$Status': status.capitalize(),
-        '$status': status.toLowerCase(),
-        '$project': binding.execution.project,
-        '$job': binding.execution.job.name,
-        '$group': binding.execution.job.group,
-        '$job_full': (binding.execution.job.group ? binding.execution.job.group + '/' : '') + binding.execution.job.name,
-        '$user': binding.execution.user,
-        '$id': binding.execution.id.toString()
+        '${job.STATUS}': status.toUpperCase(),
+        '${job.Status}': status.capitalize(),
+        '${job.status}': status.toLowerCase(),
+        '${job.fullName}': (binding.execution.job.group ? binding.execution.job.group + '/' : '') + binding.execution.job.name
     ]
-    // replace any specified job options in ${option.name} format
-    text.replaceAll(/\$\{option\.(\S+?\})/) { all, match ->
-        binding.execution.context.option[match] ?: all
-    }
-    text.replaceAll(/(\$\w+)/) { all, match ->
+    text.replaceAll(/(\$\{\S+?\})/) { all, match ->
         tokens[match] ?: all
     }
 }
@@ -143,20 +134,17 @@ rundeckPlugin(NotificationPlugin) {
           scope: 'Instance'
 
       title title: 'Title', required: true, scope: 'Instance', defaultValue: defaultTitle,
-          description: 'Message title. Can contain $Status, $STATUS, $status (job status), \
-          $project (project name), $job (job name), $group (group name), \
-          $job_full (job group/name), $user (user name), $id (execution id), \
-          ${option.name} (any job option)'
+          description: 'Message title. Can contain ${job.*} and ${option.*} context variables, \
+          as well as ${job.Status} (capitalized status), ${job.STATUS} (all-caps), \
+          and ${job.fullName} (job group/project name}'
 
       additionalText title: 'Additional Text', scope: 'InstanceOnly',
-          description: 'Additional message text below title. Can contain $Status, \
-          $STATUS, $status (job status), $project (project name), $job (job name), \
-          $group (group name), $job_full (job group/name), $user (user name), \
-          $id (execution id), ${option.name} (any job option)'
+          description: 'Additional message text below title. Can contain ${job.*} and \
+          ${option.*} context variables, as well as ${job.Status} (capitalized status), \
+          ${job.STATUS} (all-caps), and ${job.fullName} (job group/project name}'
 
       optionFields title: 'Option fields', description: 'Comma-delimited list of job \
-          options to include as fields in message (caution: can expose secure options)',
-          scope: 'InstanceOnly'
+          options to include as attachment fields in message', scope: 'InstanceOnly'
 
       includeFailedNodes title: 'Include failed nodes field', type: 'Boolean',
           defaultValue: false, scope: 'Instance'
