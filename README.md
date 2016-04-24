@@ -9,14 +9,15 @@ Copy `SlackNotification.groovy` to the Rundeck plugins directory `$RDECK_BASE/li
 
 ## Configuration
 
-#### Required Properties
-This following properties are required, and can be set at the framework or project
-level:
-* `webhookUrl` - the incoming webhook URL configured in Slack custom integrations.
+#### Framework/Project Properties
+This following properties can be set at the framework or project level:
+* `webhookUrl` - (required) the incoming webhook URL configured in Slack custom integrations.
+* `iconEmoji` - override default bot emoji
+* `username` - override default bot username
 
-#### Optional Properties
-The following properties are optional, and can be set at the framework or project
-level. They can also be overridden at the instance-level for each job:
+#### Additional Properties
+The following properties are optional, and can be set at the framework/project
+level, as well as the instance-level for each job:
 * `channel` - channel(s) to post messages to. If not specified, will send to default
   channel configured for the incoming webhook on slack.com. Accepts a comma-delimited
   list of multiple channels and/or users (e.g. `#general` or `#room1,#room2,@user1`).

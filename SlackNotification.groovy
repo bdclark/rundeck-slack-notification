@@ -11,7 +11,7 @@ def defaultTitle = '$Status [$project] $job_full run by $user (#$id)'
 /**
  * Expands the title string using a predefined set of tokens
  */
-def titleString(text, binding) {
+def expandString(text, binding) {
     // make status more friendly
     def status = binding.execution.status
     if (binding.execution.status == 'running') {
@@ -68,16 +68,15 @@ def post(String url, String postContent) {
 }
 
 /**
- * Send Slack attachment.
+ * Send Slack message.
  * @param url the incoming webhook url
- * @param attachment the attachment map to send
- * @param channel override default channel
+ * @param message the message map to send
  */
-def sendAttachment(String url, Map attachment, String channel = '') {
-    def content = JsonOutput.toJson([channel: channel, attachments: [attachment]])
+def sendMessage(String url, Map message) {
+    def content = JsonOutput.toJson(message)
     def response = post(url, content)
     if (! "ok".equals(response)) {
-        System.err.println("ERROR: SlackAttachment plugin response: ${response}, url: ${config.webhookUrl}, request: ${content}")
+        System.err.println("ERROR: SlackAttachment plugin response: ${response}, url: ${url}, request: ${content}")
     }
 }
 
@@ -88,11 +87,13 @@ def sendAttachment(String url, Map attachment, String channel = '') {
  * @param color the color for the message
  */
 def triggerMessage(Map execution, Map config, String defaultColor) {
-    def expandedTitle = titleString(config.title, [execution: execution])
+    def expandedTitle = expandString(config.title, [execution: execution])
+    def expandedText = expandString(config.additionalText, [execution: execution])
     def attachment = [
         fallback: expandedTitle + ' - ' + execution.href,
         title: expandedTitle,
         title_link: execution.href,
+        text: expandedText,
         color: config.color ?: defaultColor,
         fields: []
     ]
@@ -112,12 +113,19 @@ def triggerMessage(Map execution, Map config, String defaultColor) {
         ]
     }
 
+    def message = [
+        username: config.username,
+        icon_emoji: config.iconEmoji,
+        attachments: [attachment]
+    ]
+
     if (config.channel) {
         for (channel in config.channel.tokenize(', ')) {
-            sendAttachment(config.webhookUrl, attachment, channel)
+            message.channel = channel
+            sendMessage(config.webhookUrl, message)
         }
     } else {
-        sendAttachment(config.webhookUrl, attachment)
+        sendMessage(config.webhookUrl, message)
     }
 }
 
@@ -127,23 +135,33 @@ rundeckPlugin(NotificationPlugin) {
   configuration {
       webhookUrl title: 'Webhook URL', description: 'Slack incoming webhook URL', scope: 'Project'
 
-      channel title: 'Channel', scope: 'Instance',
-          description: 'Slack channel/user (comma-delimited for multiple)'
+      iconEmoji title: 'Icon emoji', description: 'Override default bot icon', scope: 'Project'
 
-      title title: 'Title', required: true, scope: 'Instance',
-          defaultValue: defaultTitle,
+      username title: 'Username', description: 'Override default bot username', scope: 'Project'
+
+      channel title: 'Channel', description: 'Slack channel/user (comma-delimited for multiple)',
+          scope: 'Instance'
+
+      title title: 'Title', required: true, scope: 'Instance', defaultValue: defaultTitle,
           description: 'Message title. Can contain $Status, $STATUS, $status (job status), \
           $project (project name), $job (job name), $group (group name), \
           $job_full (job group/name), $user (user name), $id (execution id), \
           ${option.name} (any job option)'
 
-      color title: 'Color', description: 'Override default message color'
+      additionalText title: 'Additional Text', scope: 'InstanceOnly',
+          description: 'Additional message text below title. Can contain $Status, \
+          $STATUS, $status (job status), $project (project name), $job (job name), \
+          $group (group name), $job_full (job group/name), $user (user name), \
+          $id (execution id), ${option.name} (any job option)'
 
       optionFields title: 'Option fields', description: 'Comma-delimited list of job \
-          options to include as fields in message (caution: can expose secure options)'
+          options to include as fields in message (caution: can expose secure options)',
+          scope: 'InstanceOnly'
 
       includeFailedNodes title: 'Include failed nodes field', type: 'Boolean',
           defaultValue: false, scope: 'Instance'
+
+      color title: 'Color', description: 'Override default message color', scope: 'InstanceOnly'
   }
   onstart { Map executionData, Map configuration ->
       triggerMessage(executionData, configuration, 'warning')
