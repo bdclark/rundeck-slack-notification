@@ -31,12 +31,12 @@ def titleString(text, binding) {
         '$user': binding.execution.user,
         '$id': binding.execution.id.toString()
     ]
-    text.replaceAll(/(\$\w+)/) {
-        if (tokens[it[1]]) {
-            tokens[it[1]]
-        } else {
-            it[0]
-        }
+    // replace any specified job options in ${option.name} format
+    text.replaceAll(/\$\{option\.(\S+?\})/) { all, match ->
+        binding.execution.context.option[match] ?: all
+    }
+    text.replaceAll(/(\$\w+)/) { all, match ->
+        tokens[match] ?: all
     }
 }
 
@@ -96,6 +96,15 @@ def triggerMessage(Map execution, Map config, String defaultColor) {
         color: config.color ?: defaultColor,
         fields: []
     ]
+    for (opt in config.optionFields.tokenize(', ')) {
+        if (execution.context.option[opt]) {
+            attachment.fields << [
+                title: opt,
+                value: execution.context.option[opt],
+                short: true
+            ]
+        }
+    }
     if (execution.failedNodeList && config.includeFailedNodes) {
         attachment.fields << [
           title: "Failed nodes",
@@ -113,22 +122,28 @@ def triggerMessage(Map execution, Map config, String defaultColor) {
 }
 
 rundeckPlugin(NotificationPlugin) {
-  title = 'SlackAttachment'
-  description = 'Send message to Slack'
+  title = 'Slack'
+  description = 'send webhook to slack'
   configuration {
       webhookUrl title: 'Webhook URL', description: 'Slack incoming webhook URL', scope: 'Project'
 
-      channel title: 'Channel', description: 'Slack channel', scope: 'Instance'
+      channel title: 'Channel', scope: 'Instance',
+          description: 'Slack channel/user (comma-delimited for multiple)'
 
       title title: 'Title', required: true, scope: 'Instance',
           defaultValue: defaultTitle,
           description: 'Message title. Can contain $Status, $STATUS, $status (job status), \
           $project (project name), $job (job name), $group (group name), \
-          $job_full (job group/name), $user (user name), $id (execution id)'
+          $job_full (job group/name), $user (user name), $id (execution id), \
+          ${option.name} (any job option)'
 
       color title: 'Color', description: 'Override default message color'
 
-      includeFailedNodes title: 'Include failed nodes field', type: 'Boolean', defaultValue: false, scope: 'Instance'
+      optionFields title: 'Option fields', description: 'Comma-delimited list of job \
+          options to include as fields in message (caution: can expose secure options)'
+
+      includeFailedNodes title: 'Include failed nodes field', type: 'Boolean',
+          defaultValue: false, scope: 'Instance'
   }
   onstart { Map executionData, Map configuration ->
       triggerMessage(executionData, configuration, 'warning')

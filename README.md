@@ -5,7 +5,7 @@ Use this [notification plugin][1] to post messages to Slack via
 
 ## Installation
 
-Copy `SlackAttachment.groovy` to the Rundeck plugins directory `$RDECK_BASE/libext/`.
+Copy `SlackNotification.groovy` to the Rundeck plugins directory `$RDECK_BASE/libext/`.
 
 ## Configuration
 
@@ -38,12 +38,12 @@ The default title format is `$Status [$project] $job_full run by $user (#$id)`.
 Configure the webhook URL with framework scope by adding an entry in
 `$RDECK_BASE/etc/framework.properties`:
 ```
-framework.plugin.Notification.SlackAttachment.webhookUrl=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+framework.plugin.Notification.SlackNotification.webhookUrl=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
 ```
 Configure the webhook URL with project scope by adding an entry to
 `$RDECK_BASE/projects/[ProjectName]/etc/project.properties`:
 ```
-project.plugin.Notification.SlackAttachment.webhookUrl=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+project.plugin.Notification.SlackNotification.webhookUrl=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 [1]: http://rundeck.org/docs/developer/notification-plugin-development.html
