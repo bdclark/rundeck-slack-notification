@@ -86,7 +86,8 @@ def triggerMessage(Map execution, Map config, String defaultColor) {
         title_link: execution.href,
         text: expandedText,
         color: config.color ?: defaultColor,
-        fields: []
+        fields: [],
+        mrkdwn_in: ['title', 'text']
     ]
     for (opt in config.optionFields.tokenize(', ')) {
         if (execution.context.option[opt]) {

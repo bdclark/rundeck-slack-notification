@@ -40,6 +40,8 @@ Configure the webhook URL with project scope by adding an entry to
 `$RDECK_BASE/projects/[ProjectName]/etc/project.properties`:
 ```
 project.plugin.Notification.SlackNotification.webhookUrl=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+# and maybe set a project-specific channel
+project.plugin.Notification.SlackNotification.channel=\#myproject
 ```
 
 [1]: http://rundeck.org/docs/developer/notification-plugin-development.html
