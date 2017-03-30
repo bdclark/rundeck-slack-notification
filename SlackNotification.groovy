@@ -78,6 +78,13 @@ def sendMessage(String url, Map message) {
  * @param color the color for the message
  */
 def triggerMessage(Map execution, Map config, String defaultColor) {
+    if (configuration.proxyHost != null && configuration.proxyPort != null) {
+        System.err.println("DEBUG: proxyHost="+configuration.proxyHost)
+        System.err.println("DEBUG: proxyPort="+configuration.proxyPort)
+        System.getProperties().put("proxySet", "true")
+        System.getProperties().put("proxyHost", configuration.proxyHost)
+        System.getProperties().put("proxyPort", configuration.proxyPort)
+    }
     def expandedTitle = expandString(config.title, [execution: execution])
     def expandedText = expandString(config.additionalText, [execution: execution])
     def attachment = [
@@ -151,6 +158,10 @@ rundeckPlugin(NotificationPlugin) {
           defaultValue: false, scope: 'Instance'
 
       color title: 'Color', description: 'Override default message color', scope: 'InstanceOnly'
+
+      proxyHost title:"Proxy host", description:"Outbound proxy", scope:"Project", defaultValue:null, required:false
+
+      proxyPort title:"Proxy port", description:"Outbound proxy port", scope:"Project", defaultValue:null, required:false
   }
   onstart { Map executionData, Map configuration ->
       triggerMessage(executionData, configuration, 'warning')
