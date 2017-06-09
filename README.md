@@ -27,6 +27,7 @@ level, as well as the instance-level for each job:
   * `${job.STATUS}` - job status (all caps)
   * `${job.Status}` - job status (capitalized)
   * `${job.fullName}` - job's full name in `group/job` format
+  * `${new_line}` - Multiline Messages
 
 The default title format is `${job.Status} [${job.project}] ${job.fullName} run by ${job.username} (#${job.execid})`.
 

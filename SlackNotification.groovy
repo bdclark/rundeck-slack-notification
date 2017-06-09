@@ -24,6 +24,7 @@ def expandString(text, binding) {
         '${job.STATUS}': status.toUpperCase(),
         '${job.Status}': status.capitalize(),
         '${job.status}': status.toLowerCase(),
+        '${new_line}': '\n',
         '${job.fullName}': (binding.execution.job.group ? binding.execution.job.group + '/' : '') + binding.execution.job.name
     ]
     text.replaceAll(/(\$\{\S+?\})/) { all, match ->
