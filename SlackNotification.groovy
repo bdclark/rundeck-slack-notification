@@ -78,12 +78,12 @@ def sendMessage(String url, Map message) {
  * @param color the color for the message
  */
 def triggerMessage(Map execution, Map config, String defaultColor) {
-    if (configuration.proxyHost != null && configuration.proxyPort != null) {
-        System.err.println("DEBUG: proxyHost="+configuration.proxyHost)
-        System.err.println("DEBUG: proxyPort="+configuration.proxyPort)
+    if (config.proxyHost != null && config.proxyPort != null) {
+        System.err.println("DEBUG: proxyHost="+config.proxyHost)
+        System.err.println("DEBUG: proxyPort="+config.proxyPort)
         System.getProperties().put("proxySet", "true")
-        System.getProperties().put("proxyHost", configuration.proxyHost)
-        System.getProperties().put("proxyPort", configuration.proxyPort)
+        System.getProperties().put("proxyHost", config.proxyHost)
+        System.getProperties().put("proxyPort", config.proxyPort)
     }
     def expandedTitle = expandString(config.title, [execution: execution])
     def expandedText = expandString(config.additionalText, [execution: execution])
