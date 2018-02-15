@@ -14,6 +14,8 @@ This following properties can be set at the framework or project level:
 * `webhookUrl` - (required) the incoming webhook URL configured in Slack custom integrations.
 * `iconEmoji` - override default bot emoji
 * `username` - override default bot username
+* `proxyHost` - (optional) egress proxy host if outbound requests need to be proxied.
+* `proxyPort` - (required if `proxyHost` is set) egress proxy port.
 
 #### Additional Properties
 The following properties are optional, and can be set at the framework/project
