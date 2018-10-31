@@ -26,8 +26,10 @@ def expandString(text, binding) {
         '${job.status}': status.toLowerCase(),
         '${job.fullName}': (binding.execution.job.group ? binding.execution.job.group + '/' : '') + binding.execution.job.name
     ]
-    text.replaceAll(/(\$\{\S+?\})/) { all, match ->
-        tokens[match] ?: all
+    if (text != null) {
+        text.replaceAll(/(\$\{\S+?\})/) { all, match ->
+            tokens[match] ?: all
+        }
     }
 }
 
@@ -89,13 +91,15 @@ def triggerMessage(Map execution, Map config, String defaultColor) {
         fields: [],
         mrkdwn_in: ['title', 'text']
     ]
-    for (opt in config.optionFields.tokenize(', ')) {
-        if (execution.context.option[opt]) {
-            attachment.fields << [
-                title: opt,
-                value: execution.context.option[opt],
-                short: true
-            ]
+    if (config.optionFields != null) {
+        for (opt in config.optionFields.tokenize(', ')) {
+            if (execution.context.option[opt]) {
+                attachment.fields << [
+                    title: opt,
+                    value: execution.context.option[opt],
+                    short: true
+                ]
+            }
         }
     }
     if (execution.failedNodeList && config.includeFailedNodes) {
